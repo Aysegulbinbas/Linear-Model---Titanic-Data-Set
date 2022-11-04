@@ -1,0 +1,297 @@
+---
+title: "Linear Models"
+author: "AyşegülBinbaş"
+date: "04 11 2022"
+output: word_document
+---
+
+Logistic regression model on Titanic data set:
+```{r}
+
+
+getwd()
+setwd("C:/Users/90551/Desktop/364-HW1")
+library("readxl")
+titanic.data <- read_excel("titanic.xlsx")
+
+set.seed(12)
+head(titanic.data)
+summary(titanic.data)
+str(titanic.data)
+dim(titanic.data)
+
+#In data set , pclass,sex,embarked and survived are factor,others numeric.
+
+
+titanic.data$Pclass <- as.factor(titanic.data$Pclass)
+titanic.data$Sex <- as.factor(titanic.data$Sex)
+titanic.data$Embarked <- as.factor(titanic.data$Embarked)
+titanic.data$Survived <- as.factor(titanic.data$Survived)
+
+str(titanic.data)
+
+id <- sample(1:891, 891*0.65)  # to create test and train data sets.
+train <- titanic.data[id,]
+test <- titanic.data[-id,]
+
+# a :
+#In order to fit logistic regression model :
+model <- glm(Survived ~., data = train, family = "binomial")
+summary(model)
+#b:
+
+#Pclass,Sexmale,Age,SibSp are significant, their p-values are less than threshold value.
+#Also, as can be seen from the model result, AIC is 422.57
+
+#For Betha3:-3.108631
+
+Betha3 <- -2.72252
+exp(Betha3)
+(exp(-2.72252)-1)*100
+#When we compared gender with the other variables held constant, the odds will decreased by 93.42 %.
+
+#For Betha4:
+Betha4 <- -0.051330 
+exp(Betha4)
+(exp(-0.051330 )-1)*100
+
+#When we increased age 1 unit with the other variables held constant, the odds will decreased by 5.0034 %.
+
+# c:
+
+exp( 3.810156-2.230870*1 -0.042543*35 + 0.003767*75 )/(1+exp( 3.810156-2.230870*1 -0.042543*35 + 0.003767*75))
+predict(model, newdata = data.frame(Pclass = "3", Sex = "female", Age = 35,
+                                    SibSp = 0, Parch = 0, Fare = 75, Embarked = "C"), type = "response")
+
+#d:
+#For this test, hypothesis are:
+#Ho : betha1 =0, ha: betha1 =!0
+  
+betha.1 <- -1.31
+se.1  <- 0.4334
+#The test statistic :
+Test.stat.1 = betha.1 /se.1
+Test.stat.1
+
+#For critical value :
+qnorm(0.005 , lower.tail = FALSE)
+
+#The null hypothesis can  rejected,since  2.575829 < 3.022612
+
+#Ho : betha2 =0, ha: betha2 =!0
+
+betha.2 <- -2.505448   
+se.2  <- 0.472162
+#The test statistic :
+Test.stat.2 = betha.2 /se.2
+Test.stat.2
+
+# 2.575829  < Test.stat.2 (5.306331),thus we can reject null hypothesis.
+
+
+#Ho : betha3 =0, ha: betha3 =!0
+
+betha.3 <- -2.722520
+se.3  <- 0.284836
+#The test statistic :
+Test.stat.3 = betha.3 /se.3
+Test.stat.3
+
+
+# 2.575829< 9.558202,so null hypothesis is rejected.
+
+
+#Ho : betha4 =0, ha: betha4 =!0
+
+betha.4 <- -0.051330 
+se.4 <- 0.01027
+#The test statistic :
+Test.stat.4 = betha.4 /se.4
+Test.stat.4
+
+
+# 2.575829< 4.998053,so null hypothesis is rejected.
+
+#Ho : betha5 =0, ha: betha5 =!0
+
+betha.5 <- -0.331610
+se.5 <- 0.160267
+#The test statistic :
+Test.stat.5 = betha.5 /se.5
+Test.stat.5
+
+
+# 2.575829 > 2.06911,so null hypothesis cannot be rejected.
+
+
+
+#Ho : betha6 =0, ha: betha6 =!0
+
+betha.6 <- -0.030417
+se.6 <- 0.165288
+#The test statistic :
+Test.stat.6 = betha.6 /se.6
+Test.stat.6
+
+
+# 2.575829 > 0.1840242,so null hypothesis cannot be rejected.
+
+#Ho : betha7 =0, ha: betha7 =!0
+
+betha.7 <- -0.002573
+se.7 <- 0.004845  
+#The test statistic :
+Test.stat.7 = betha.7/se.7
+Test.stat.7
+
+
+# 2.575829 >  0.531063,so null hypothesis cannot be rejected.
+
+#Ho : betha8 =0, ha: betha8 =!0
+
+betha.8 <- -1.484907
+se.8 <- 0.788495
+#The test statistic :
+Test.stat.8 = betha.8/se.8
+Test.stat.8
+
+
+# 2.575829 >1.883217,so null hypothesis cannot be rejected.
+
+#Ho : betha9 =0, ha: betha9 =!0
+
+betha.9 <- -0.677611
+se.9 <- 0.349350  
+#The test statistic :
+Test.stat.9 = betha.9/se.9
+Test.stat.9
+
+
+# 2.575829 > 1.939634 ,so null hypothesis cannot be rejected.
+
+
+
+
+# e:
+#Hypothesis for global test :
+#Ho: All betha are equal to each other , Ha: at least one of them is different
+
+
+full.model <- glm(Survived ~., data = train, family = "binomial", na.action = na.omit)
+reduced.model <- glm(Survived~1, data= train, family = "binomial",na.action = na.omit)
+summary(full.model)
+summary(reduced.model)
+
+
+# Test statistics as follows:
+
+2*(logLik(full.model) - logLik(reduced.model))  #  360.2595 
+
+#To find critical value
+qchisq(0.01, 9, lower.tail = F)  # 21.66599
+
+#Test stat is greater than the critical value ,hence  model is significant.
+
+
+
+
+# f:
+
+CI <- function(beta){
+  a <- beta - 1.64*(sqrt(var(beta)/length(beta)))
+  b <- beta + 1.64*(sqrt(var(beta)/length(beta)))
+  return(paste(names(model$coefficients),":",a,b))
+  
+  
+}
+
+CI(model$coefficients)
+
+# Intervals for Pclass2,Pclass3,Sexmale,EmbarkedQ   does not contain 0,so there is a statistically significant relationship
+#Intervals for age,SibSp,Parch,Fare,EmbarkedS contain 0, so there is not a statistically significant relationship
+
+
+
+
+# g:
+
+CI.odds <- function(beta){
+  a <- exp(beta - 1.64*(sqrt(var(beta)/length(beta))))
+  b <- exp(beta + 1.64*(sqrt(var(beta)/length(beta))))
+  return(paste("odds ratio of",names(model$coefficients),":",a,b))
+  
+  
+}
+
+CI.odds(model$coefficients)
+
+
+# Intervals for Pclass2,Pclass3,Sexmale,EmbarkedQ  does not contain 1,so there is a statistically significant relationship
+#Intervals for age,SibSp,Parch,Fare,EmbarkedS contain 1, so there is not a statistically significant relationship
+
+
+
+
+# h:
+
+library("ResourceSelection")
+
+hoslem.test(model$y, fitted(model), g=8)
+# p-value = 0.06745,that is greater than alpha,hence we can say that model is not significant.However, diff is so small.
+
+
+# ı:
+
+model.test <- glm(Survived~., test, family = "binomial")
+probs <- predict(model.test, test, type =  "response")
+predicted <- ifelse(probs > 0.5, 1, 0)
+table <- table(predicted, actual = test$Survived)
+table
+accuracy <- (121+80)/(121+26+23+80)
+accuracy
+
+classification.error <- (26+243)/(121+26+23+80)
+classification.error
+
+sensivity <- 80/(80+26)
+sensivity
+
+specificity <- 121/(121+23)
+specificity
+
+positive.preditive.value <- 80/(80+23)
+positive.preditive.value
+
+negative.preditive.value <- 121/(121+26)
+negative.preditive.value
+
+prevalence  <- (80+26)/(121+26+23+80)
+prevalence
+
+detection.rate <- 80/(121+26+23+80)
+detection.rate
+
+detection.prevalence <- (80+23)/(121+26+23+80)
+detection.prevalence
+
+balanced.accuracy <- (sensivity+specificity)/2
+balanced.accuracy
+
+#install.packages("caret")
+library(caret)
+
+confusionMatrix(table, positive = "1")
+
+
+
+# J:
+#install.packages("pROC")
+library(pROC)
+roc <- roc(test$Survived ~ probs, plot = TRUE, print.auc = TRUE, legacy.axes=T)
+coords(roc, "best", ret="threshold")
+
+
+
+
+```
+
